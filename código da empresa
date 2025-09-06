@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mitol Dimon</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #1a1a1a; color: #fff; margin:0; padding:0; text-align:center; }
+  .page { display: none; padding: 50px; }
+  h1, h2 { color: #f39c12; }
+  button { padding: 10px 20px; margin: 10px; font-size: 1.1em; cursor: pointer; }
+  input, select, textarea { padding: 8px; margin: 5px; font-size: 1em; }
+  #adminPanel { background: #333; padding: 20px; margin-top: 20px; display:none; text-align:left;}
+  .hidden { display:none; }
+  hr { border:1px solid #555; margin:15px 0;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN ADMIN -->
+<div id="loginPage" class="page" style="display:block;">
+  <h1>Mitol Dimon</h1>
+  <p>Digite sua chave de administrador:</p>
+  <input type="password" id="adminKey" placeholder="Chave secreta">
+  <button onclick="loginAdmin()">Entrar</button>
+  <button onclick="goPage('homePage')">Continuar como usuário</button>
+</div>
+
+<!-- PÁGINA INICIAL -->
+<div id="homePage" class="page">
+  <h1>Mitol Dimon</h1>
+  <p id="homeText">Na história de como eu sou um mini fazedor de jogos, espero inspirar pessoas a criar coisas incríveis.</p>
+  <p><strong>Você quer fazer parte da nossa empresa?</strong></p>
+  <button onclick="goPage('acceptPage')">Sim</button>
+  <button onclick="goPage('declinePage')">Não</button>
+</div>
+
+<!-- PÁGINA ACEITOU -->
+<div id="acceptPage" class="page">
+  <p>Já que você aceitou, é só falar com a gente e vamos ver as coisas.</p>
+  <button onclick="goPage('quizPage')">Fazer o teste</button>
+</div>
+
+<!-- PÁGINA REJEITOU -->
+<div id="declinePage" class="page">
+  <p>Beleza, já pode se retirar.</p>
+</div>
+
+<!-- QUESTIONÁRIO AVANÇADO -->
+<div id="quizPage" class="page">
+  <h2>Questionário</h2>
+  <p>Responda para sabermos seu perfil:</p>
+  <form id="quizForm">
+    <p>Você prefere trabalhar com:</p>
+    <select name="area" required>
+      <option value="">Escolha...</option>
+      <option value="programacao">Programação</option>
+      <option value="arte">Arte</option>
+      <option value="design">Design</option>
+      <option value="gameplay">Gameplay</option>
+    </select>
+
+    <p>Você se considera:</p>
+    <select name="personalidade" required>
+      <option value="">Escolha...</option>
+      <option value="criativo">Criativo</option>
+      <option value="analitico">Analítico</option>
+      <option value="lider">Líder</option>
+      <option value="colaborador">Colaborador</option>
+    </select>
+
+    <p>Você gosta de trabalhar em equipe?</p>
+    <select name="teamwork" required>
+      <option value="">Escolha...</option>
+      <option value="sim">Sim</option>
+      <option value="nao">Não</option>
+    </select>
+
+    <p>Você se considera mais introvertido ou extrovertido?</p>
+    <select name="temperamento" required>
+      <option value="">Escolha...</option>
+      <option value="introvertido">Introvertido</option>
+      <option value="extrovertido">Extrovertido</option>
+      <option value="equilibrado">Equilibrado</option>
+    </select>
+
+    <p>Qual sua experiência com jogos?</p>
+    <select name="experiencia" required>
+      <option value="">Escolha...</option>
+      <option value="iniciante">Iniciante</option>
+      <option value="intermediario">Intermediário</option>
+      <option value="avancado">Avançado</option>
+    </select>
+
+    <br><br>
+    <button type="button" onclick="submitQuiz()">Enviar</button>
+  </form>
+</div>
+
+<!-- RESULTADO -->
+<div id="resultPage" class="page">
+  <h2>Seu relatório</h2>
+  <div id="report"></div>
+  <button onclick="goPage('homePage')">Voltar para início</button>
+  <div id="adminDecision" class="hidden">
+    <p>Deseja aceitar este candidato?</p>
+    <button onclick="acceptCandidate(true)">Aceitar</button>
+    <button onclick="acceptCandidate(false)">Rejeitar</button>
+  </div>
+</div>
+
+<!-- PÁGINA ADMIN -->
+<div id="adminPanel">
+  <h2>Painel Administrador</h2>
+  <p><strong>Relatórios de candidatos:</strong></p>
+  <div id="allReports"></div>
+  <hr>
+  <h3>Editar texto da página inicial:</h3>
+  <textarea id="homeTextInput" rows="3" cols="50"></textarea><br>
+  <button onclick="updateHomeText()">Atualizar Texto</button>
+  <hr>
+  <h3>Adicionar links ou scripts:</h3>
+  <input type="text" id="customLink" placeholder="Link ou script"><button onclick="addCustom()">Adicionar</button>
+  <div id="customContent"></div>
+</div>
+
+<script>
+let isAdmin = false;
+let reports = [];
+let currentReportIndex = null;
+
+// LOGIN ADMIN
+function loginAdmin() {
+  const key = document.getElementById('adminKey').value;
+  if(key === 'HC123'){
+    isAdmin = true;
+    document.getElementById('adminPanel').style.display = 'block';
+    alert('Bem-vindo, Administrador!');
+  }
+  goPage('homePage');
+}
+
+// NAVEGAÇÃO ENTRE PÁGINAS
+function goPage(pageId){
+  document.querySelectorAll('.page').forEach(p => p.style.display='none');
+  document.getElementById(pageId).style.display='block';
+}
+
+// SUBMIT QUESTIONÁRIO
+function submitQuiz(){
+  const form = document.getElementById('quizForm');
+  const data = {
+    area: form.area.value,
+    personalidade: form.personalidade.value,
+    teamwork: form.teamwork.value,
+    temperamento: form.temperamento.value,
+    experiencia: form.experiencia.value
+  };
+
+  let recomendacao = '';
+  if(data.teamwork==='sim' && data.temperamento==='extrovertido') recomendacao = 'Candidato muito adequado!';
+  else if(data.teamwork==='nao' && data.temperamento==='introvertido') recomendacao = 'Candidato precisa de acompanhamento.';
+  else recomendacao = 'Candidato com perfil equilibrado.';
+
+  const reportText = `
+    Área preferida: ${data.area}<br>
+    Personalidade: ${data.personalidade}<br>
+    Trabalho em equipe: ${data.teamwork}<br>
+    Temperamento: ${data.temperamento}<br>
+    Experiência: ${data.experiencia}<br>
+    Status: ${recomendacao}
+  `;
+  document.getElementById('report').innerHTML = reportText;
+
+  // salvar relatório
+  reports.push({report: reportText, status: 'pendente'});
+  currentReportIndex = reports.length-1;
+
+  // atualizar painel admin
+  if(isAdmin) updateAdminReports();
+
+  // mostrar decisão para admin
+  if(isAdmin) document.getElementById('adminDecision').classList.remove('hidden');
+
+  goPage('resultPage');
+}
+
+// DECISÃO DO ADMIN
+function acceptCandidate(decision){
+  if(currentReportIndex!==null){
+    reports[currentReportIndex].status = decision ? 'Aceito' : 'Rejeitado';
+    document.getElementById('report').innerHTML += `<br><strong>${decision?'Parabéns! O administrador te aceitou.':'Infelizmente, você não foi aceito.'}</strong>`;
+    updateAdminReports();
+    document.getElementById('adminDecision').classList.add('hidden');
+  }
+}
+
+// ATUALIZAR RELATÓRIOS ADMIN
+function updateAdminReports(){
+  if(!isAdmin) return;
+  let html = '';
+  reports.forEach((r,i)=>{
+    html += `<div><strong>Candidato ${i+1}:</strong><br>${r.report}<br>Status: ${r.status}<hr></div>`;
+  });
+  document.getElementById('allReports').innerHTML = html;
+}
+
+// ATUALIZAR TEXTO HOME
+function updateHomeText(){
+  const text = document.getElementById('homeTextInput').value;
+  document.getElementById('homeText').innerText = text;
+  alert('Texto atualizado com sucesso!');
+}
+
+// ADICIONAR LINK OU SCRIPT CUSTOM
+function addCustom(){
+  const content = document.getElementById('customLink').value;
+  if(content){
+    const div = document.createElement('div');
+    div.innerHTML = content;
+    document.getElementById('customContent').appendChild(div);
+    document.getElementById('customLink').value = '';
+  }
+}
+</script>
+
+</body>
+</html>
